@@ -28,6 +28,4 @@ public class IngredientTest {
     public Ingredient getIngridientTest(){
         return new Ingredient(IngredientType.FILLING, nameTest,priceTest);
     }
-
 }
-

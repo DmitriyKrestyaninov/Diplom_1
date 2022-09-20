@@ -6,11 +6,8 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import praktikum.Bun;
-import praktikum.Burger;
-import praktikum.Ingredient;
+import praktikum.*;
 import org.mockito.MockitoAnnotations;
-import praktikum.IngredientType;
 
 
 @RunWith(Parameterized.class)
@@ -26,18 +23,18 @@ public class BurgerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        burger.setBuns(bun);
-        setIngridientInBurger(indexPassed);
+        database = new Database();
     }
 
     @Mock
     private Bun bun;
     @Mock
     private Ingredient ingredient;
-    @Mock
-    private Ingredient fakeIngredient;
+
     @Spy
     private Burger burger;
+
+    private Database database;
 
     @Test
     public void setBunsTest() {
@@ -59,7 +56,7 @@ public class BurgerTest {
     }
 
     @Parameterized.Parameters(name = "{index}:moveIngredientIndex{0}={1}")
-    public static Object[][] getDataFormoveIngredientTest() {
+    public static Object[][] getDataForMoveIngredientTest() {
         return new Object[][]{
                 {2, 2},
                 {3, 3},
@@ -69,6 +66,7 @@ public class BurgerTest {
 
     @Test
     public void moveIngredientTest() {
+        setIngridientInBurger(indexPassed);
         burger.addIngredient(ingredient);
         burger.moveIngredient(burger.ingredients.indexOf(ingredient), indexPassed);
         Assert.assertEquals("The passed index and expected index not to match", indexExpected, burger.ingredients.indexOf(ingredient));
@@ -76,24 +74,33 @@ public class BurgerTest {
 
     @Test
     public void getPriceTest() {
+        setMockIngredientBurger(indexPassed);
+        burger.setBuns(bun);
         burger.getPrice();
         Mockito.verify(bun).getPrice();
         System.out.println(burger.ingredients);
-        Mockito.verify(fakeIngredient, Mockito.times(burger.ingredients.size())).getPrice();
+        Mockito.verify(ingredient, Mockito.times(burger.ingredients.size())).getPrice();
     }
 
     @Test
     public void getReceiptTest() {
-         Mockito.when(bun.getName()).thenReturn("test  burger");
-         Mockito.when(fakeIngredient.getType()).thenReturn(IngredientType.SAUCE);
-         Mockito.when(burger.getPrice()).thenReturn(44F);
-         String testReceipt = burger.getReceipt();
-         Assert.assertNotNull("the method does not return the burger recipe",testReceipt);
+        setMockIngredientBurger(indexPassed);
+        burger.setBuns(bun);
+        Mockito.when(bun.getName()).thenReturn("test  burger");
+        Mockito.when(ingredient.getType()).thenReturn(IngredientType.SAUCE);
+        Mockito.when(burger.getPrice()).thenReturn(44F);
+        String testReceipt = burger.getReceipt();
+        Assert.assertNotNull("the method does not return the burger recipe", testReceipt);
     }
 
     public void setIngridientInBurger(int indexPassed) {
         for (int i = 0; i <= indexPassed; i++) {
-            burger.addIngredient(fakeIngredient);
+            burger.addIngredient(database.availableIngredients().get(i));
+        }
+    }
+    public void setMockIngredientBurger(int indexPassed) {
+        for (int i = 0; i <= indexPassed; i++) {
+            burger.addIngredient(ingredient);
         }
     }
 }
